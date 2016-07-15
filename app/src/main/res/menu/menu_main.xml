@@ -1,0 +1,30 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.gu.cheng.horizontalexpandlistview.MainActivity">
+    <item
+        android:id="@+id/action_horizontal_ListView"
+        android:orderInCategory="100"
+        android:title="horizontal_ListView"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_vertical_ListView"
+        android:orderInCategory="100"
+        android:title="vertical_ListView"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_horizontal_gridView"
+        android:orderInCategory="100"
+        android:title="horizontal_gridView"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_vertical_gridView"
+        android:orderInCategory="100"
+        android:title="vertical_gridView"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_staggered_"
+        android:orderInCategory="100"
+        android:title="staggered"
+        app:showAsAction="never" />
+</menu>
