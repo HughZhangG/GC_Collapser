@@ -271,7 +271,8 @@ public class ExpandableRecyclerViewAdapter extends RecyclerView
 
                                 Toast.makeText(v.getContext(), mActualSelectedGroupPos +"--1--",Toast.LENGTH_SHORT).show();
 
-                                notifyDataSetChanged();
+//                                notifyDataSetChanged();
+                                notifyItemRangeChanged(0,mData.size());
 
                                 /**
                                  * 此处存在一个BUG
@@ -319,7 +320,8 @@ public class ExpandableRecyclerViewAdapter extends RecyclerView
                                     onItemSelectedChangeListener.selectedChang(mActualSelectedGroupPos,-1/*mActualSelectedChildPos*/);
                                 }
 
-                                notifyDataSetChanged();
+//                                notifyDataSetChanged();
+                                notifyItemRangeChanged(0,mData.size());
                                 /**
                                  * 此处存在一个BUG
                                  * 当有子项的父项展开式 直接点击另一个没有子项的父项，那么子项的关闭动画还没执行，就直接调用了notify
@@ -353,7 +355,6 @@ public class ExpandableRecyclerViewAdapter extends RecyclerView
 
 
     /**
-     * set selected item
      *
      * @param groupPosition
      * @param childPosition

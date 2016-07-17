@@ -15,6 +15,8 @@ public class GirlsContract {
         void showError();
         void showNormal();
         void loadData(int pos,List<GirlsBean.ResultsBean> data);
+
+        void loadMore(List<GirlsBean.ResultsBean> results);
     }
 
     interface Presenter extends BasePresenter{

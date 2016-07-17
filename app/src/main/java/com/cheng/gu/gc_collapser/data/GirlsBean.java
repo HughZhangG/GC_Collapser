@@ -1,5 +1,6 @@
 package com.cheng.gu.gc_collapser.data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -46,7 +47,7 @@ public class GirlsBean {
         this.results = results;
     }
 
-    public static class ResultsBean {
+    public static class ResultsBean implements Serializable {
         private String _id;
         private String createdAt;
         private String desc;

@@ -1,6 +1,7 @@
 package com.cheng.gu.gc_collapser.girls;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cheng.gu.gc_collapser.ImageActivity;
 import com.cheng.gu.gc_collapser.R;
 import com.cheng.gu.gc_collapser.adapter.ExpandableRecyclerViewAdapterPlus;
 import com.cheng.gu.gc_collapser.animateor.ScaleInLeftAnimator;
@@ -22,6 +24,7 @@ import com.cheng.gu.gc_collapser.base.ViewHolder;
 import com.cheng.gu.gc_collapser.data.GirlsBean;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +35,11 @@ import butterknife.Unbinder;
 /**
  * Created by gc on 2016/7/16.
  */
-public class GirlsFragment extends Fragment implements GirlsContract.View, SwipeRefreshLayout
-        .OnRefreshListener {
+public class GirlsFragment extends Fragment implements GirlsContract.View, ExpandableRecyclerViewAdapterPlus.OnChildClickListener {
 
     private static final String TAG = GirlsFragment.class.getSimpleName();
+    public static final String BUNDLE_KEY = "BUNDLE_KEY";
+    public static final String BUNDLE_KEY_POS = "BUNDLE_KEY_POS";
     @BindView(R.id.id_swipe_refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
 
@@ -50,6 +54,8 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
 
     private List<List<GirlsBean.ResultsBean>> mChild;
     private ExpandableRecyclerViewAdapterPlus mAdapterPlus;
+
+    int page = 0;
 
     @Override
     public void onAttach(Context context) {
@@ -74,7 +80,19 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
         swipeRefreshLayout.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue
                 .COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
         swipeRefreshLayout.setRefreshing(true);
-        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d(TAG,"-----------onRefresh---------");
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        swipeRefreshLayout.setRefreshing(false);
+//                    }
+//                },100);
+                mPresenter.loadMore(page);
+            }
+        });
         mPresenter.start();
     }
 
@@ -93,9 +111,10 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
     }
 
     @Override
-    public void loadData(int i, List<GirlsBean.ResultsBean> data) {
+    public synchronized void loadData(int i, List<GirlsBean.ResultsBean> data) {
         Log.d(TAG, "loadData: " + i);
-        String groupContent = "第   " + i + "  组";
+        page++;
+        String groupContent = "第   " + (page) + "  组";
         if (mGroup == null) {
             mGroup = new ArrayList<String>();
         }
@@ -104,10 +123,6 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
         }
         mGroup.add(groupContent);
         mChild.add(data);
-
-        Log.d(TAG, "-----------" + data.size());
-
-
 
         if (mGroup.size() == GirlsPresenter.PAGE_COUNT) {
             swipeRefreshLayout.setRefreshing(false);
@@ -130,6 +145,7 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
                     @Override
                     public void bindChildData(ViewHolder holder, int groupPos, int childPos) {
                         ImageView imageView = holder.getView(R.id.id_iv_item_child);
+
                         String url = mChild.get(groupPos).get(childPos).getUrl();
                         Picasso.with(mContext).load(url).into(imageView);
                     }
@@ -150,6 +166,7 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
 
                     }
                 });
+                mAdapterPlus.setOnChildClickListener(this);
                 mRecyclerView.setAdapter(mAdapterPlus);
                 mAdapterPlus.setActualSelectedPosition(-1, -1);
                 mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager
@@ -163,20 +180,32 @@ public class GirlsFragment extends Fragment implements GirlsContract.View, Swipe
     }
 
     @Override
+    public synchronized void loadMore(List<GirlsBean.ResultsBean> results) {
+        if (mAdapterPlus != null) {
+            page++;
+            String title = "第   " + page + "  组";
+            mGroup.add(title);
+            mChild.add(results);
+            mAdapterPlus.loadMore(title,results);
+        }
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         unbinder.unbind();
     }
 
-    int i = 1;
-
     @Override
-    public void onRefresh() {
-        //do refresh
-        /*if (mChild == null)
-            mPresenter.start();*/
-//        mPresenter.start(i);
-//        i++;
+    public void onChildClick(int groupPos, int childPos, Object obj) {
+        if (! (obj instanceof GirlsBean.ResultsBean))
+            return;
+        Intent intent = new Intent(mContext, ImageActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt(BUNDLE_KEY_POS,childPos);
+        bundle.putSerializable(BUNDLE_KEY, (Serializable) mChild.get(groupPos));
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
-
 }

@@ -40,4 +40,19 @@ public class GirlsPresenter implements BasePresenter {
         }
 
     }
+
+    public void loadMore(int page){
+        mRepository.getGirls(PAGE_SIZE,page,new GirlsDataSource.LoadGirlsDataCallback(){
+
+            @Override
+            public void onGirlsDataLoaded(GirlsBean girlsBean) {
+                mView.loadMore(girlsBean.getResults());
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+
+            }
+        });
+    }
 }

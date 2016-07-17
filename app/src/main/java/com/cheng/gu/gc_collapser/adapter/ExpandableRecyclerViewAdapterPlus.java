@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.cheng.gu.gc_collapser.base.ViewHolder;
 
@@ -41,17 +40,37 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
     private int mActualSelectedChildPos = -1;
 
 
+    private OnChildClickListener onChildClickListener;
+
+    public void loadMore(T title, List<H> results) {
+        mGroupDataList.add(title);
+        mChildDataList.add(results);
+        mData.add(title);
+        notifyItemInserted(mData.size()-1);
+    }
+
+    public interface OnChildClickListener {
+        void onChildClick(int groupPos, int ChildPos, Object obj);
+    }
+
+    public void setOnChildClickListener(OnChildClickListener listener) {
+        onChildClickListener = listener;
+    }
+
+
     private OnItemSelectedChangeListener onItemSelectedChangeListener;
 
     public interface OnItemSelectedChangeListener {
         void selectedChang(int groupPos, int childPos);
     }
+
     public void setOnItemSelectedChangeListener(OnItemSelectedChangeListener listener) {
         onItemSelectedChangeListener = listener;
     }
 
 
     private DataBindAndFaceModeManager dataBindAndFaceModeManager;
+
     public interface DataBindAndFaceModeManager {
         void showDefaultChildFace(ViewHolder holder);
 
@@ -69,16 +88,24 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
         void showExpandedGroupFace(ViewHolder holder);
 
     }
+
     public void setDataBindAndFaceModeManager(DataBindAndFaceModeManager manager) {
         dataBindAndFaceModeManager = manager;
     }
 
 
-
     public ExpandableRecyclerViewAdapterPlus(Context context, List<T> groupList, List<List<H>> childList,
                                              @LayoutRes int groupLayoutId, @LayoutRes int childLayoutId) {
-        mGroupDataList = groupList == null ? new ArrayList<T>() : groupList;
-        mChildDataList = childList == null ? new ArrayList<List<H>>() : childList;
+
+        mGroupDataList = new ArrayList<T>();
+        mChildDataList = new ArrayList<List<H>>();
+
+        if (groupList != null) {
+            mGroupDataList.addAll(groupList);
+            mChildDataList.addAll(childList);
+        }
+//        mGroupDataList = groupList == null ? new ArrayList<T>() : groupList;
+//        mChildDataList = childList == null ? new ArrayList<List<H>>() : childList;
 
         if (getGroupCount() != mChildDataList.size()) {
             throw new IllegalArgumentException(
@@ -117,7 +144,7 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
         if (dataBindAndFaceModeManager != null) {
             if (isChild(position)) {
                 dataBindAndFaceModeManager.showDefaultChildFace(holder);
-            }else{
+            } else {
                 dataBindAndFaceModeManager.showCollapsedGroupFace(holder);
             }
 
@@ -138,7 +165,7 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
 //                        }
 //                    }
                     if (mActualSelectedGroupPos == position) {
-                            dataBindAndFaceModeManager.showExpandedGroupFace(holder);
+                        dataBindAndFaceModeManager.showExpandedGroupFace(holder);
                     }
 
                 } else if (isChild(position)) {
@@ -199,10 +226,11 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
                             onItemSelectedChangeListener.selectedChang(mActualSelectedGroupPos, -1);
                         }
 
-                        notifyDataSetChanged();
+//                        notifyDataSetChanged();
 
-                        Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--a--", Toast
-                                .LENGTH_SHORT).show();
+//                        Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--a--", Toast
+//                                .LENGTH_SHORT).show();
+                        Log.d(TAG, "onClick--1: groupPos:"+mActualSelectedGroupPos);
                     }
 
                 } else {
@@ -211,6 +239,15 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
                         int childPos = layoutPosition - mSelectedGroupPos - 1;
 
                         setSelectedPosition(mSelectedGroupPos, childPos);
+
+                        if (onChildClickListener != null) {
+                            onChildClickListener.onChildClick(mSelectedGroupPos, childPos, mData.get
+                                    (layoutPosition));
+                        }
+//                        Toast.makeText(mContext, "-->onChildClick:   groupPos:" + mSelectedGroupPos + "" +
+//                                " childPos:" + childPos, Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "onClick--2: "+"-->onChildClick:   groupPos:" + mSelectedGroupPos + "" +
+                                " childPos:" + childPos);
 
                         /**
                          * 点击子项,保存状态
@@ -243,10 +280,11 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
                                     mActualSelectedChildPos);
                         }
 
-                        notifyDataSetChanged();
+//                        notifyDataSetChanged();
 
-                        Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--b--" +
-                                mActualSelectedChildPos, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--b--" +
+//                                mActualSelectedChildPos, Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "onClick--3: groupPos:"+mActualSelectedGroupPos);
                     } else {
 
                         if (layoutPosition <= mSelectedGroupPos) {
@@ -285,10 +323,11 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
                                             -1/*mActualSelectedChildPos*/);
                                 }
 
-                                Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--c--", Toast
-                                        .LENGTH_SHORT).show();
+//                                Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--c--", Toast
+//                                        .LENGTH_SHORT).show();
+                                Log.d(TAG, "onClick--4: groupPos:"+mActualSelectedGroupPos);
 
-                                notifyDataSetChanged();
+//                                notifyDataSetChanged();
 
                                 /**
                                  * 此处存在一个BUG
@@ -338,7 +377,7 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
                                             -1/*mActualSelectedChildPos*/);
                                 }
 
-                                notifyDataSetChanged();
+//                                notifyDataSetChanged();
                                 /**
                                  * 此处存在一个BUG
                                  * 当有子项的父项展开式 直接点击另一个没有子项的父项，那么子项的关闭动画还没执行，就直接调用了notify
@@ -350,8 +389,9 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
                                  */
 //                                notifyItemRangeChanged(mActualSelectedGroupPos);
 
-                                Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--d--", Toast
-                                        .LENGTH_SHORT).show();
+//                                Toast.makeText(v.getContext(), mActualSelectedGroupPos + "--d--", Toast
+//                                        .LENGTH_SHORT).show();
+                                Log.d(TAG, "onClick--5: groupPos:"+mActualSelectedGroupPos);
                             }
 
                         }
@@ -391,10 +431,13 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
         }
 
         if (mLastSelectedGroup != -1) {
-            for (int i = 0; i < getChildCount(mLastSelectedGroup); i++) {
+//            for (int i = 0; i < getChildCount(mLastSelectedGroup); i++) {
 //                mData.remove(mLastSelectedGroup + 1);//去掉3个值
-                notifyItemRemoved(mLastSelectedGroup + 1);
-            }
+//                notifyItemRemoved(mLastSelectedGroup + 1);
+//            }
+//
+            mData.removeAll(mChildDataList.get(mLastSelectedGroup));
+            notifyItemRangeRemoved(mLastSelectedGroup+1,getChildCount(mLastSelectedGroup));
             if (mLastSelectedGroup == groupPosition && hasChild(groupPosition)) {
                 mSelectedGroupPos = -1;
                 return;
@@ -407,11 +450,13 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
 
         if (mSelectedGroupPos != -1 && mSelectedGroupPos != mLastSelectedGroup) {
             if (hasChild(mSelectedGroupPos)) {
-                for (int i = 0; i < getChildCount(mSelectedGroupPos); i++) {
+//                for (int i = 0; i < getChildCount(mSelectedGroupPos); i++) {
 //                    mData.add(mSelectedGroupPos + 1, mChildDataList.get(mSelectedGroupPos).get
 //                            (getChildCount(mSelectedGroupPos) - 1 - i));
-                    notifyItemInserted(mSelectedGroupPos + 1);
-                }
+//                    notifyItemInserted(mSelectedGroupPos + 1);
+//                }
+                mData.addAll(mSelectedGroupPos + 1,mChildDataList.get(mSelectedGroupPos));
+                notifyItemRangeInserted(mSelectedGroupPos + 1,getChildCount(mSelectedGroupPos));
             }
         }
 
@@ -499,15 +544,5 @@ public class ExpandableRecyclerViewAdapterPlus<T, H> extends RecyclerView.Adapte
 
         return TYPE_GROUP;
     }
-
-    public void addData(T t, List<H> h) {
-        mGroupDataList.add(t);
-        mChildDataList.add(h);
-
-        mData.add(t);
-
-        notifyDataSetChanged();
-    }
-
 
 }
