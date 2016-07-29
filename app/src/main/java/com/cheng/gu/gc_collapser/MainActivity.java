@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         child4.add("第四组-第四个");
         mChild.add(child1);
         mChild.add(child2);
-        mChild.add(null);
+        mChild.add(child3);
         mChild.add(child4);
 
 
